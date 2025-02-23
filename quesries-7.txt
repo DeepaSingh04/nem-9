@@ -1,0 +1,99 @@
+// Calculate the average marks per subject
+{
+  $group: {
+    _id: "$subject",
+    averageMarks: { $avg: "$marks" }
+  }
+}
+
+// Find the highest and lowest marks in each subject
+{
+  $group: {
+    _id: "$subject",
+    highestMarks: { $max: "$marks" },
+    lowestMarks: { $min: "$marks" }
+  }
+}
+
+// Count the number of students appearing for each subject
+{
+  $group: {
+    _id: "$subject",
+    studentCount: { $sum: 1 }
+  }
+}
+
+// Identify students scoring above 80 marks in any subject
+{
+  $match: {
+    marks: { $gt: 80 }
+  }
+}
+
+// Determine the total marks obtained by all students
+{
+  $group: {
+    _id: null,
+    totalMarks: { $sum: "$marks" }
+  }
+}
+
+// Group students by class and find the average marks per class
+{
+  $group: {
+    _id: "$class",
+    averageMarks: { $avg: "$marks" }
+  }
+}
+
+// Identify the subject with the highest average marks
+{
+  $group: {
+    _id: "$subject",
+    averageMarks: { $avg: "$marks" }
+  }
+},
+{
+  $sort: { averageMarks: -1 }
+},
+{
+  $limit: 1 }
+
+// Find students scoring less than 70 marks and categorize them as "Needs Improvement"
+{
+  $match: {
+    marks: { $lt: 70 }
+  }
+}
+
+// Find the top 2 highest-scoring students in each subject
+{
+  $sort: { subject: 1, marks: -1 }
+},
+{
+  $group: {
+    _id: "$subject",
+    topStudents: { $push: { name: "$name", marks: "$marks" } }
+  }
+},
+{
+  $project: {
+    _id: 1,
+    topStudents: { $slice: ["$topStudents", 2] }
+  }
+}
+
+// Calculate the pass percentage (students scoring ≥ 40 marks) per subject
+{
+  $group: {
+    _id: "$subject",
+    totalStudents: { $sum: 1 },
+    passedStudents: { $sum: { $cond: { if: { $gte: ["$marks", 40] }, then: 1, else: 0 } } }
+  }
+},
+{
+  $project: {
+    _id: 1,
+    passPercentage: { $multiply: [{ $divide: ["$passedStudents", "$totalStudents"] }, 100] }
+  }
+}

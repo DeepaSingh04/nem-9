@@ -1,0 +1,124 @@
+
+
+
+// Calculate the total sales amount for each product category
+{
+  $group: {
+    _id: "$category",
+    totalSales: { $sum: "$amount" }
+  }
+}
+
+
+
+// Determine the month-wise total sales amount
+{
+  $group: {
+    _id: { $substr: ["$date", 0, 7] }, // Extracting YYYY-MM
+    totalSales: { $sum: "$amount" }
+  }
+}
+
+
+
+
+// Identify the highest-selling product (by revenue)
+{
+  $group: {
+    _id: "$product",
+    totalRevenue: { $sum: "$amount" }
+  }
+},
+{
+  $sort: { totalRevenue: -1 }
+},
+{
+  $limit: 1
+}
+
+// Find the average sale amount across all transactions
+{
+  $group: {
+    _id: null,
+    averageSale: { $avg: "$amount" }
+  }
+}
+
+
+
+// Count the number of sales made in each month
+{
+  $group: {
+    _id: { $substr: ["$date", 0, 7] },
+    salesCount: { $sum: 1 }
+  }
+}
+
+
+
+// Determine the total sales per region
+{
+  $group: {
+    _id: "$region",
+    totalSales: { $sum: "$amount" }
+  }
+}
+
+
+
+// Identify the top 3 highest revenue-generating products
+{
+  $group: {
+    _id: "$product",
+    totalRevenue: { $sum: "$amount" }
+  }
+},
+{
+  $sort: { totalRevenue: -1 }
+},
+{
+  $limit: 3
+}
+
+
+
+// Find the total number of sales transactions per category
+{
+  $group: {
+    _id: "$category",
+    transactionCount: { $sum: 1 }
+  }
+}
+
+
+
+// Determine the average sales amount for each region
+{
+  $group: {
+    _id: "$region",
+    avgSalesAmount: { $avg: "$amount" }
+  }
+}
+
+
+
+// Find the total sales for Electronics and Fashion categories separately
+{
+  $match: { category: "Electronics" }
+},
+{
+  $group: {
+    _id: "$category",
+    totalSales: { $sum: "$amount" }
+  }
+}
+
+{
+  $match: { category: "Fashion" }
+},
+{
+  $group: {
+    _id: "$category",
+    totalSales: { $sum: "$amount" }
+  }
+}
